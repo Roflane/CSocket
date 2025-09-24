@@ -48,31 +48,31 @@ int main() {
 
                 log_green("\nClient accepted!");
 
-                std::thread clientThread ([&, clientSocket](){
-                        try {
-                            std::string buffer = {};
-                            buffer.resize(BUFFER_CAP);
+                std::thread clientThread ([&](){
+                    try {
+                        std::string buffer = {};
+                        buffer.resize(BUFFER_CAP);
 
-                            const int nicknameData = sock.ReceiveFrom(clientSocket, buffer.data(), BUFFER_CAP);
-                            if (nicknameData > 0) {
-                                const std::string nickname = buffer.substr(0, nicknameData);
-                                log_green("Established connection with %s", nickname.c_str());
+                        const int nicknameData = sock.ReceiveFrom(clientSocket, buffer.data(), BUFFER_CAP);
+                        if (nicknameData > 0) {
+                            const std::string nickname = buffer.substr(0, nicknameData);
+                            log_green("Established connection with %s", nickname.c_str());
 
-                                while (true) {
-                                    const int messageData = sock.ReceiveFrom(clientSocket, buffer.data(), BUFFER_CAP);
+                            while (true) {
+                                const int messageData = sock.ReceiveFrom(clientSocket, buffer.data(), BUFFER_CAP);
 
-                                    if (messageData > 0) {
-                                        const std::string message = buffer.substr(0, messageData);
-                                        log_green("Message from %s: %s", nickname.c_str(), message.c_str());
-                                    }
-                                    else {
-                                        CSocket::CloseClient(clientSocket);
-                                        log_red("Client '%s' has been disconnected!", nickname.c_str());
-                                        break;
-                                    }
+                                if (messageData > 0) {
+                                    const std::string message = buffer.substr(0, messageData);
+                                    log_green("Message from %s: %s", nickname.c_str(), message.c_str());
+                                }
+                                else {
+                                    CSocket::CloseClient(clientSocket);
+                                    log_red("Client '%s' has been disconnected!", nickname.c_str());
+                                    break;
                                 }
                             }
                         }
+                    }
                     catch (const std::exception &e) {
                         CSocket::CloseClient(clientSocket);
                         log_red("Exception: %s", e.what());
